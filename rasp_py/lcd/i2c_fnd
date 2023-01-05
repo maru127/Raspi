@@ -1,0 +1,77 @@
+import RPi.GPIO as GPIO
+import I2C_driver as LCD
+import time
+
+
+#      A   B   C   D   E   F   G
+seg = [38, 29, 31, 33, 35, 37, 40]
+PWMpin= 12
+
+fnd  = [(0,0,0,0,0,0,1),    #0
+        (1,0,0,1,1,1,1),    #1
+        (0,0,1,0,0,1,0),    #2
+        (0,0,0,0,1,1,0),    #3
+        (1,0,0,1,1,0,0),    #4
+        (0,1,0,0,1,0,0),    #5
+        (0,1,0,0,0,0,0),    #6
+        (0,0,0,1,1,0,1),    #7
+        (0,0,0,0,0,0,0),    #8
+        (0,0,0,0,1,0,0)]    #9
+
+
+def setup():
+    
+    
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setwarnings(False)
+    GPIO.setup(seg, GPIO.OUT, initial=GPIO.HIGH)
+
+    GPIO.setup(PWMpin, GPIO.OUT)
+
+def main():
+    duty_ratio= 0
+    MaxDuty= 12
+    
+    setup()
+    GPIO.output(seg,GPIO.HIGH)
+
+    Servo=GPIO.PWM(PWMpin, 50)
+    while True:
+        status = int(input('1:FND, 2:servo, 3:lCD = '))
+
+        if status == 1:
+            num = input('innput number : ')
+            while num != '00':
+                num = input('innput number : ')
+                GPIO.output(seg,fnd[int(num)])
+
+        elif status == 2:
+            Servo.start(0)
+            print('Wating for 1 sec') 
+            time.sleep(1) 
+
+            while duty_ratio <= MaxDuty:
+                Servo.ChangeDutyCycle(duty_ratio)
+                time.sleep(2)
+                duty_ratio+= 1
+        
+            if duty_ratio == MaxDuty:
+                duty_ratio= 0
+                Servo.ChangeDutyCycle(duty_ratio)
+    
+            Servo.stop()
+            GPIO.cleanup()
+            print('Everythings cleanup')
+        elif status == 3:
+            mylcd = LCD.lcd()
+            c = input()
+            while c != "clear":
+                c = input()
+                if c == "cl":
+                    mylcd.lcd_clear()
+                else:
+                    mylcd.lcd_display_string(c,1)
+
+        
+if __name__ == '__main__':
+    main()
