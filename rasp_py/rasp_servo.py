@@ -16,9 +16,10 @@ print('Wating for 1 sec')
 time.sleep(1)
 
 try:
-    for i in range(1,10,2):
-        pwm_servo.ChangeDutyCycle(i)
-        time.sleep(1)
+    pwm_servo.ChangeDutyCycle(0)
+    time.sleep(1)
+    pwm_servo.ChangeDutyCycle(12)
+    time.sleep(1)
 
 
 finally:
